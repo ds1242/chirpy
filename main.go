@@ -7,7 +7,11 @@ import (
 
 // type Server struct {}
 
-// func (Server) ServeHTTP(http.ResponseWriter, *http.Request) {}
+func healthzHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
 
 func main() {
 	const filepathRoot = "."
@@ -15,8 +19,9 @@ func main() {
 	const port = "8080"
 
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir(filepathRoot)))
+	mux.Handle("/app/*", http.StripPrefix("/app/", http.FileServer(http.Dir(filepathRoot))))
 	mux.Handle("/assets", http.FileServer(http.Dir(filepathRoot)))
+	mux.HandleFunc("/healthz", healthzHandler)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
