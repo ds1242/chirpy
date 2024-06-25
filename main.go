@@ -1,25 +1,26 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-	"errors"
-	"os"
+	"log"
 )
 
-type Server struct {}
+// type Server struct {}
 
-func (Server) ServeHTTP(http.ResponseWriter, *http.Request) {}
+// func (Server) ServeHTTP(http.ResponseWriter, *http.Request) {}
 
 func main() {
-	mux := http.NewServeMux()
+	const filepathRoot = "."
+	const port = "8080"
 
-	mux.Handle("/", Server{})
-	err := http.ListenAndServe(":8080", nil)
-	if errors.Is(err, http.ErrServerClosed) {
-		fmt.Printf("server closed\n")
-	} else if err != nil {
-		fmt.Printf("error starting server: %s\n", err)
-		os.Exit(1)
+	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(http.Dir(filepathRoot)))
+
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: mux,
 	}
+
+	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
+	log.Fatal(srv.ListenAndServe())
 }
