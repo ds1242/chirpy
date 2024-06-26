@@ -19,7 +19,7 @@ func healthzHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *apiConfig) middlewareMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Hits: %d", cfg.fileserverHits)
 }
@@ -46,9 +46,9 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/app/*", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
 	mux.Handle("/assets", http.FileServer(http.Dir(filepathRoot)))
-	mux.HandleFunc("/healthz", healthzHandler)
-	mux.HandleFunc("/metrics", apiCfg.middlewareMetricsHandler)	
-	mux.HandleFunc("/reset", apiCfg.middlewareResetHandler)
+	mux.HandleFunc("GET /api/healthz", healthzHandler)
+	mux.HandleFunc("GET /admin/metrics", apiCfg.middlewareMetricsHandler)	
+	mux.HandleFunc("/api/reset", apiCfg.middlewareResetHandler)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
