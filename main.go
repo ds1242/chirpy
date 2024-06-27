@@ -50,6 +50,14 @@ func chirpValidator(w http.ResponseWriter, r *http.Request) {
 		Body string `json:"body"`
 	}
 
+	type invalidChirp struct {
+		Error string `json:"error"`
+	}
+
+	type validChirp struct {
+		Valid bool `json:"valid"`
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 
@@ -59,7 +67,31 @@ func chirpValidator(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	fmt.Printf(params.Body)
+	if len(params.Body) > 140 {
+		dat, err := json.Marshal(invalidChirp{Error:"Chirp is too long"})
+
+		if err != nil {
+			log.Printf("Error marshalling JSON: %s", err)
+			w.WriteHeader(500)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(400)
+		w.Write(dat)
+	}
+
+	dat, err := json.Marshal(validChirp{Valid: true})
+
+	if err != nil {
+		log.Printf("Error marshalling JSON: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(dat)
 }
 
 
