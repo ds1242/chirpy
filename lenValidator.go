@@ -13,9 +13,7 @@ func chirpValidator(w http.ResponseWriter, r *http.Request) {
 		Body string `json:"body"`
 	}
 
-	type invalidChirp struct {
-		Error string `json:"error"`
-	}
+	
 
 	type validChirp struct {
 		Valid bool `json:"valid"`
