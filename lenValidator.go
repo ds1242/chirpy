@@ -13,7 +13,7 @@ func chirpValidator(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type validChirp struct {
-		Valid bool `json:"valid"`
+		Cleaned_body string `json:"cleaned_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -29,6 +29,6 @@ func chirpValidator(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, validChirp{
-		Valid: true,
+		Cleaned_body: "true",
 	})
 }
