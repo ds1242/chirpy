@@ -1,8 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 )
 
 
@@ -28,7 +28,10 @@ func chirpValidator(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 
+	cleanBody := chirpCleaner(params.Body)
+	
+
 	respondWithJSON(w, http.StatusOK, validChirp{
-		Cleaned_body: "true",
+		Cleaned_body: cleanBody,
 	})
 }
