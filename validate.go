@@ -7,7 +7,7 @@ import (
 
 
 
-func chirpValidator(w http.ResponseWriter, r *http.Request) {
+func validateChirp(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body string `json:"body"`
 	}
