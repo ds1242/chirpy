@@ -5,16 +5,14 @@ package main
  )
 
 
-func chirpCleaner(body string) string {
+func chirpCleaner(body string, badWords map[string]struct{}) string {
 	bodySplit := strings.Split(body, " ")
-	var outputSlice []string
-	for _, word := range(bodySplit) {
-		if strings.ToLower(word) == "kerfuffle" || strings.ToLower(word) == "sharbert" || strings.ToLower(word) == "fornax" {
-			outputSlice = append(outputSlice, "****")
-			continue
+	for i, word := range bodySplit {
+		loweredWord := strings.ToLower(word)
+		if _, ok := badWords[loweredWord]; ok {
+			bodySplit[i] = "****"
 		}
-		outputSlice = append(outputSlice, word)
 	}
-	joinedBody := strings.Join(outputSlice, " ")
-	return joinedBody
+	cleaned := strings.Join(bodySplit, " ")
+	return cleaned
 }

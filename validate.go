@@ -28,7 +28,13 @@ func validateChirp(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 
-	cleanBody := chirpCleaner(params.Body)
+	badWords := map[string]struct{}{
+		"kerfuffle": {},
+		"sharbert":  {},
+		"fornax":    {},
+	}
+
+	cleanBody := chirpCleaner(params.Body, badWords)
 	
 
 	respondWithJSON(w, http.StatusOK, validChirp{
