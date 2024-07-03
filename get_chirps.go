@@ -40,7 +40,7 @@ func (cfg *apiConfig)GetSingleChirpHandler(w http.ResponseWriter, r *http.Reques
 	}
 	chirp, err := cfg.DB.GetSingleChirp(chirpID)
 	if err != nil {
-		helpers.RespondWithError(w, http.StatusBadRequest, "error finding chirp")
+		helpers.RespondWithError(w, http.StatusNotFound, "error finding chirp")
 		return
 	}
 	helpers.RespondWithJSON(w, http.StatusOK, database.Chirp{
