@@ -2,9 +2,9 @@ package database
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"sync"
+	"fmt"
 )
 
 type Chirp struct {
@@ -21,46 +21,12 @@ type DBStructure struct {
 	Chirps map[int]Chirp `json:"chirps"`
 }
 
-// NewDB creates a new database connection
-// and creates the database file if it doesn't exist
-func NewDB(path string) (*DB, error) {
-	dbInstance := DB{
-		path: path,
-		mux: &sync.RWMutex{},
-	}
-	data, err := os.ReadFile(dbInstance.path)
-	if os.IsNotExist(err) {
-		initialDB := DBStructure{Chirps: make(map[int]Chirp)}
-
-		initialData, marshallErr := json.Marshal(initialDB)
-		if marshallErr != nil {
-			return nil, marshallErr
-		}
-
-		writeErr := os.WriteFile(dbInstance.path, initialData, 0644)
-		if writeErr != nil {
-			return nil, writeErr
-		}
-	} else if err != nil {
-		return nil, err
-	} else {
-		var dbStruct DBStructure
-		err = json.Unmarshal(data, &dbStruct)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Printf("Loaded database: %v\n", dbStruct)
-	}
-
-	return &dbInstance, nil
-}
-
-
 // CreateChirp creates a new chirp and saves it to disk
 func (db *DB) CreateChirp(body string) (Chirp, error) {
 	db.mux.Lock()
 	defer db.mux.Unlock()
-	
+	// add loadDB to ensure it has the latest data
+	// finish off with writeDB
 	data, err := os.ReadFile(db.path)
     if err != nil {
         return Chirp{}, err
@@ -81,12 +47,9 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 	
 	dbStruct.Chirps[newID] = newChirp
 
-	updatedData, marshallErr := json.Marshal(dbStruct)
-	if marshallErr != nil {
-		return Chirp{}, marshallErr
-	}
+	
 
-	writeErr := os.WriteFile(db.path, updatedData, 0644)
+	writeErr := db.writeDB(dbStruct)
 	if writeErr != nil {
 		return Chirp{}, writeErr
 	}
@@ -96,17 +59,59 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 
 
 // GetChirps returns all chirps in the database
-// func (db *DB) GetChirps() ([]Chirp, error)
+func (db *DB) GetChirps() ([]Chirp, error)
 
 
 // ensureDB creates a new database file if it doesn't exist
-// func (db *DB) ensureDB() error
+func (db *DB) ensureDB() error {
+	
+	_, err := os.ReadFile(db.path)
+	if os.IsNotExist(err) {
+		initialDB := DBStructure{Chirps: make(map[int]Chirp)}
+
+		writeErr := db.writeDB(initialDB)
+
+		if writeErr != nil {
+			return writeErr
+		}
+	}
+	return nil
+}
 
 
 
 // loadDB reads the database file into memory
-// func (db *DB) loadDB() (DBStructure, error)
+func (db *DB) loadDB() (DBStructure, error) {
+	var dbStruct DBStructure
+	err := db.ensureDB()
+	if err != nil {
+		return DBStructure{}, err
+	}
+
+	data, err := os.ReadFile(db.path)
+		
+	err = json.Unmarshal(data, &dbStruct)
+	if err != nil {
+		return DBStructure{}, err
+	}
+	fmt.Printf("Loaded database: %v\n", dbStruct)
+
+	return dbStruct, nil
+	
+}
 
 
 // writeDB writes the database file to disk
-// func (db *DB) writeDB(dbStructure DBStructure) error
+func (db *DB) writeDB(dbStructure DBStructure) error {
+
+	data, marshallErr := json.Marshal(dbStructure)
+	if marshallErr != nil {
+		return  marshallErr
+	}
+
+	writeErr := os.WriteFile(db.path, data, 0644)
+	if writeErr != nil {
+		return writeErr
+	}
+	return nil
+}
