@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"sort"
+	"strconv"
 	"github.com/ds1242/chirpy/helpers"
 	"github.com/ds1242/chirpy/database"
 )
@@ -30,6 +31,9 @@ func (cfg *apiConfig)GetAllChirpsHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (cfg *apiConfig)GetSingleChirpHandler(w http.ResponseWriter, r *http.Request) {
-	chirpID := r.PathValue("chirpID")
+	chirpID, err := strconv.Atoi(r.PathValue("chirpID"))
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusBadRequest, "cannot find chirp")
+	}
 	helpers.RespondWithJSON(w, http.StatusOK, chirpID)
 }
