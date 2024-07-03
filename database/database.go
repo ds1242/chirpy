@@ -3,7 +3,7 @@ package database
 import (
 	"encoding/json"
 	"fmt"
-	// "net/http"
+	"errors"
 	"os"
 	"sync"
 
@@ -20,26 +20,21 @@ type DB struct {
 }
 
 type DBStructure struct {
-	LastID int 			 `json:"last_id"`
 	Chirps map[int]Chirp `json:"chirps"`
 }
 
 // CreateChirp creates a new chirp and saves it to disk
 func (db *DB) CreateChirp(body string) (Chirp, error) {
-	db.mux.Lock()
-	defer db.mux.Unlock()
-
 	dbStruct, err := db.loadDB()
 	if err != nil {
 		return Chirp{}, err
 	}
 
-	dbStruct.LastID++
-	newID := dbStruct.LastID
+	newID := len(dbStruct.Chirps) + 1
 
 	newChirp := Chirp{
-		ID: newID,
-		Body: body,
+		ID: 	newID,
+		Body: 	body,
 	}
 	
 	dbStruct.Chirps[newID] = newChirp
@@ -82,43 +77,35 @@ func(db *DB) GetSingleChirp(id int) (Chirp, error) {
 	return chirp, nil
 }
 
-// ensureDB creates a new database file if it doesn't exist
-func (db *DB) ensureDB() error {
-	
-	_, err := os.ReadFile(db.path)
-	if os.IsNotExist(err) {
-		initialDB := DBStructure{Chirps: make(map[int]Chirp)}
-
-		writeErr := db.writeDB(initialDB)
-
-		if writeErr != nil {
-			return writeErr
-		}
+func (db *DB) createDB() error {
+	dbStructure := DBStructure{
+		Chirps: map[int]Chirp{},
 	}
-	return nil
+	return db.writeDB(dbStructure)
 }
 
-
+// ensureDB creates a new database file if it doesn't exist
+func (db *DB) ensureDB() error {	
+	_, err := os.ReadFile(db.path)
+	if errors.Is(err, os.ErrNotExist) {
+		return db.createDB()
+	}
+	return err
+}
 
 // loadDB reads the database file into memory
 func (db *DB) loadDB() (DBStructure, error) {
 	db.mux.RLock()
 	defer db.mux.RUnlock()
 
-	var dbStruct DBStructure
-	err := db.ensureDB()
-	if err != nil {
-		return DBStructure{}, err
+	dbStruct := DBStructure{}
+	dat, err := os.ReadFile(db.path)
+	if errors.Is(err, os.ErrNotExist) {
+		return dbStruct, err
 	}
-
-	data, readErr := os.ReadFile(db.path)
-	if readErr != nil {
-		return DBStructure{}, readErr
-	}
-		
-	err = json.Unmarshal(data, &dbStruct)
+	err = json.Unmarshal(dat, &dbStruct)
 	if err != nil {
-		return DBStructure{}, err
+		return dbStruct, err
 	}
 	fmt.Printf("Loaded database: %v\n", dbStruct)
 
@@ -129,13 +116,15 @@ func (db *DB) loadDB() (DBStructure, error) {
 
 // writeDB writes the database file to disk
 func (db *DB) writeDB(dbStructure DBStructure) error {
+	db.mux.Lock()
+	defer db.mux.Unlock()
 
 	data, marshallErr := json.Marshal(dbStructure)
 	if marshallErr != nil {
 		return  marshallErr
 	}
 
-	writeErr := os.WriteFile(db.path, data, 0644)
+	writeErr := os.WriteFile(db.path, data, 0600)
 	if writeErr != nil {
 		return writeErr
 	}
