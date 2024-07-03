@@ -54,12 +54,11 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 
 // GetChirps returns all chirps in the database
 func (db *DB) GetChirps() ([]Chirp, error) {
-	var chirpSlice []Chirp
 	dbStruct, err := db.loadDB()
 	if err != nil {
-		return chirpSlice, err
+		return nil, err
 	}
-
+	chirpSlice := make([]Chirp, 0, len(dbStruct.Chirps))
 	for _, chirp := range dbStruct.Chirps {
 		chirpSlice = append(chirpSlice, chirp)
 	}

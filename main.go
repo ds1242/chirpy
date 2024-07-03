@@ -4,12 +4,12 @@ import (
 	"log"
 	"net/http"
 	"github.com/ds1242/chirpy/database"
-	"github.com/ds1242/chirpy/handlers"
 )
 
 // type Server struct {}
 type apiConfig struct {
-	fileserverHits int
+	fileserverHits 	int
+	DB 				*database.DB
 }
 
 
@@ -18,21 +18,26 @@ func main() {
 	const filepathRoot = "."
 	const port = "8080"
 
-	apiCfg := &apiConfig{}
 	
 	db, err := database.NewDB("./database.json")
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
-
+	
+	apiCfg := &apiConfig{
+		fileserverHits: 0,
+		DB:				db,
+	}
 	mux := http.NewServeMux()
 	mux.Handle("/app/*", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
 	mux.Handle("/assets", http.FileServer(http.Dir(filepathRoot)))
 	mux.HandleFunc("GET /api/healthz", healthzHandler)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.middlewareMetricsHandler)
 	mux.HandleFunc("/api/reset", apiCfg.middlewareResetHandler)
-	mux.HandleFunc("POST /api/chirps", handlers.CreateChirpHandler(db))
-	mux.HandleFunc("GET /api/chirps", handlers.GetAllChirps(db))
+	mux.HandleFunc("POST /api/chirps", apiCfg.CreateChirpHandler)
+	mux.HandleFunc("GET /api/chirps", apiCfg.GetAllChirpsHandler)
+	// mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.GetSingleChirp)
+
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: mux,
