@@ -8,7 +8,7 @@ import (
 )
 
 type Chirp struct {
-	ID 	 int 	`json: "id"`
+	ID 	 int 	`json:"id"`
 	Body string `json:"body"`
 }
 type DB struct {
@@ -57,12 +57,13 @@ func (db *DB) GetChirps() ([]Chirp, error) {
 	var chirpSlice []Chirp
 	dbStruct, err := db.loadDB()
 	if err != nil {
-		return nil, err
+		return chirpSlice, err
 	}
 
 	for _, chirp := range dbStruct.Chirps {
 		chirpSlice = append(chirpSlice, chirp)
 	}
+	return chirpSlice, nil
 }
 
 

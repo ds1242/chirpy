@@ -30,6 +30,17 @@ func CreateChirpHandler(db *database.DB) http.HandlerFunc {
 			http.Error(w, "unable to create chirp", http.StatusBadRequest)
 		}
 
-		helpers.RespondWithJSON(w, http.StatusAccepted, chirp)
+		helpers.RespondWithJSON(w, http.StatusCreated, chirp)
+	}
+}
+
+
+func GetAllChirps(db *database.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		chirps, err := db.GetChirps()
+		if err != nil {
+			helpers.RespondWithError(w, 400, "unable to fetch chirps")
+		}
+		helpers.RespondWithJSON(w, http.StatusOK, chirps)
 	}
 }
