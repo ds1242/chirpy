@@ -1,10 +1,13 @@
 package main
 
 import (
+	// "fmt"
 	"net/http"
 	"sort"
-	"github.com/ds1242/chirpy/helpers"
+	"strconv"
+
 	"github.com/ds1242/chirpy/database"
+	"github.com/ds1242/chirpy/helpers"
 )
 
 func (cfg *apiConfig)GetAllChirpsHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,3 +31,25 @@ func (cfg *apiConfig)GetAllChirpsHandler(w http.ResponseWriter, r *http.Request)
 
 	helpers.RespondWithJSON(w, http.StatusOK, chirps)
 }
+
+func (cfg *apiConfig)GetSingleChirpHandler(w http.ResponseWriter, r *http.Request) {
+	chirpID, err := strconv.Atoi(r.PathValue("chirpID"))
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusBadRequest, "Invalid chirp ID")
+		return
+	}
+	chirp, err := cfg.DB.GetSingleChirp(chirpID)
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusBadRequest, "error finding chirp")
+		return
+	}
+	helpers.RespondWithJSON(w, http.StatusOK, database.Chirp{
+		ID: 	chirp.ID,
+		Body: 	chirp.Body,
+	})
+}
+
+// create handler
+// get id from http request
+// 		convert id to an int
+// pass int to a method to search the database
