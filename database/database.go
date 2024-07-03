@@ -25,17 +25,11 @@ type DBStructure struct {
 func (db *DB) CreateChirp(body string) (Chirp, error) {
 	db.mux.Lock()
 	defer db.mux.Unlock()
-	// add loadDB to ensure it has the latest data
-	// finish off with writeDB
-	data, err := os.ReadFile(db.path)
-    if err != nil {
-        return Chirp{}, err
-    }
-	
-	var dbStruct DBStructure
-    if err := json.Unmarshal(data, &dbStruct); err != nil {
-        return Chirp{}, err
-    }
+
+	dbStruct, err := db.loadDB()
+	if err != nil {
+		return Chirp{}, err
+	}
 
 	dbStruct.LastID++
 	newID := dbStruct.LastID
@@ -59,7 +53,17 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 
 
 // GetChirps returns all chirps in the database
-func (db *DB) GetChirps() ([]Chirp, error)
+func (db *DB) GetChirps() ([]Chirp, error) {
+	var chirpSlice []Chirp
+	dbStruct, err := db.loadDB()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, chirp := range dbStruct.Chirps {
+		chirpSlice = append(chirpSlice, chirp)
+	}
+}
 
 
 // ensureDB creates a new database file if it doesn't exist
@@ -88,7 +92,10 @@ func (db *DB) loadDB() (DBStructure, error) {
 		return DBStructure{}, err
 	}
 
-	data, err := os.ReadFile(db.path)
+	data, readErr := os.ReadFile(db.path)
+	if readErr != nil {
+		return DBStructure{}, readErr
+	}
 		
 	err = json.Unmarshal(data, &dbStruct)
 	if err != nil {

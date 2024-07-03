@@ -1,10 +1,10 @@
 package database
 
 import (
-	"os"
+	// "os"
 	"sync"
-	"encoding/json"
-	"fmt"
+	// "encoding/json"
+	// "fmt"
 )
 
 // NewDB creates a new database connection
