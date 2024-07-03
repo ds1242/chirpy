@@ -2,9 +2,12 @@ package database
 
 import (
 	"encoding/json"
+	"fmt"
+	// "net/http"
 	"os"
 	"sync"
-	"fmt"
+
+	// "github.com/ds1242/chirpy/helpers"
 )
 
 type Chirp struct {
@@ -65,6 +68,19 @@ func (db *DB) GetChirps() ([]Chirp, error) {
 	return chirpSlice, nil
 }
 
+// Get Single Chirp from the database
+func(db *DB) GetSingleChirp(id int) (Chirp, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return Chirp{}, err
+	}
+
+	chirp, ok := dbStructure.Chirps[id]
+	if !ok {
+		return Chirp{}, os.ErrNotExist
+	}
+	return chirp, nil
+}
 
 // ensureDB creates a new database file if it doesn't exist
 func (db *DB) ensureDB() error {
@@ -86,6 +102,9 @@ func (db *DB) ensureDB() error {
 
 // loadDB reads the database file into memory
 func (db *DB) loadDB() (DBStructure, error) {
+	db.mux.RLock()
+	defer db.mux.RUnlock()
+
 	var dbStruct DBStructure
 	err := db.ensureDB()
 	if err != nil {
