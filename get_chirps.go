@@ -29,7 +29,7 @@ func (cfg *apiConfig)GetAllChirpsHandler(w http.ResponseWriter, r *http.Request)
 	helpers.RespondWithJSON(w, http.StatusOK, chirps)
 }
 
-func (cfg *apiConfig)GetSingleChirp(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig)GetSingleChirpHandler(w http.ResponseWriter, r *http.Request) {
 	chirpID := r.PathValue("chirpID")
 	helpers.RespondWithJSON(w, http.StatusOK, chirpID)
 }
