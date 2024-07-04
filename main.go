@@ -23,7 +23,7 @@ func main() {
 	dbg := flag.Bool("debug", false, "Enable debug mode")
 	flag.Parse()
 	
-	if *dbg == true {
+	if *dbg {
 		err := os.Remove("./database.json")
 		if err != nil {
 			log.Fatal(err)

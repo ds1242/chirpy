@@ -29,76 +29,16 @@ type DBStructure struct {
 	Users 	map[int]User 	`json:"users"`
 }
 
-// CreateChirp creates a new chirp and saves it to disk
-func (db *DB) CreateChirp(body string) (Chirp, error) {
-	dbStruct, err := db.loadDB()
-	if err != nil {
-		return Chirp{}, err
-	}
 
-	newID := len(dbStruct.Chirps) + 1
-
-	newChirp := Chirp{
-		ID: 	newID,
-		Body: 	body,
+// NewDB creates a new database connection
+// and creates the database file if it doesn't exist
+func NewDB(path string) (*DB, error) {
+	db := &DB{
+		path: 	path,
+		mux:  	&sync.RWMutex{},
 	}
-	
-	dbStruct.Chirps[newID] = newChirp
-
-	
-
-	writeErr := db.writeDB(dbStruct)
-	if writeErr != nil {
-		return Chirp{}, writeErr
-	}
-
-	return newChirp, nil
-}
-
-func (db *DB) CreateUser(email string) (User, error) {
-	dbStruct, err := db.loadDB()
-	if err != nil {
-		return User{}, err
-	}
-
-	newID := len(dbStruct.Users) + 1
-	newUser := User{
-		ID: 	newID,
-		Email: 	email,
-	}
-
-	dbStruct.Users[newID] = newUser
-	writeErr := db.writeDB(dbStruct)
-	if writeErr != nil{
-		return User{}, writeErr
-	}
-	return newUser, nil
-}
-// GetChirps returns all chirps in the database
-func (db *DB) GetChirps() ([]Chirp, error) {
-	dbStruct, err := db.loadDB()
-	if err != nil {
-		return nil, err
-	}
-	chirpSlice := make([]Chirp, 0, len(dbStruct.Chirps))
-	for _, chirp := range dbStruct.Chirps {
-		chirpSlice = append(chirpSlice, chirp)
-	}
-	return chirpSlice, nil
-}
-
-// Get Single Chirp from the database
-func(db *DB) GetSingleChirp(id int) (Chirp, error) {
-	dbStructure, err := db.loadDB()
-	if err != nil {
-		return Chirp{}, err
-	}
-
-	chirp, ok := dbStructure.Chirps[id]
-	if !ok {
-		return Chirp{}, os.ErrNotExist
-	}
-	return chirp, nil
+	err := db.ensureDB()
+	return db, err
 }
 
 func (db *DB) createDB() error {
