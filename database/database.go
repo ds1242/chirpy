@@ -14,13 +14,19 @@ type Chirp struct {
 	ID 	 int 	`json:"id"`
 	Body string `json:"body"`
 }
+
+type User struct {
+	ID 		int 	`json:id`
+	Email 	string 	`json:"email"`
+}
 type DB struct {
 	path string
 	mux  *sync.RWMutex
 }
 
 type DBStructure struct {
-	Chirps map[int]Chirp `json:"chirps"`
+	Chirps 	map[int]Chirp 	`json:"chirps"`
+	Users 	map[int]User 	`json:"users"`
 }
 
 // CreateChirp creates a new chirp and saves it to disk
@@ -49,7 +55,25 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 	return newChirp, nil
 }
 
+func (db *DB) CreateUser(body string) (User, error) {
+	dbStruct, err := db.loadDB()
+	if err != nil {
+		return User{}, err
+	}
 
+	newID := len(dbStruct.Users) + 1
+	newUser := User{
+		ID: 	newID,
+		Email: 	body,
+	}
+
+	dbStruct.Users[newID] = newUser
+	writeErr := db.writeDB(dbStruct)
+	if writeErr != nil{
+		return User{}, writeErr
+	}
+	return newUser, nil
+}
 // GetChirps returns all chirps in the database
 func (db *DB) GetChirps() ([]Chirp, error) {
 	dbStruct, err := db.loadDB()
