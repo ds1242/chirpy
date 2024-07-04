@@ -55,7 +55,7 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 	return newChirp, nil
 }
 
-func (db *DB) CreateUser(body string) (User, error) {
+func (db *DB) CreateUser(email string) (User, error) {
 	dbStruct, err := db.loadDB()
 	if err != nil {
 		return User{}, err
@@ -64,7 +64,7 @@ func (db *DB) CreateUser(body string) (User, error) {
 	newID := len(dbStruct.Users) + 1
 	newUser := User{
 		ID: 	newID,
-		Email: 	body,
+		Email: 	email,
 	}
 
 	dbStruct.Users[newID] = newUser
@@ -104,6 +104,7 @@ func(db *DB) GetSingleChirp(id int) (Chirp, error) {
 func (db *DB) createDB() error {
 	dbStructure := DBStructure{
 		Chirps: map[int]Chirp{},
+		Users: 	map[int]User{},
 	}
 	return db.writeDB(dbStructure)
 }

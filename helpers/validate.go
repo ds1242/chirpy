@@ -1,8 +1,6 @@
 package helpers
 
 import (
-	// "encoding/json"
-	// "net/http"
 	"errors"
 	"strings"
 )
@@ -11,21 +9,8 @@ import (
 
 func ValidateChirp(body string) (string, error){
 	
-
-	// type validChirp struct {
-	// 	Cleaned_body string `json:"cleaned_body"`
-	// }
-
-	// decoder := json.NewDecoder(r.Body)
-	// params := parameters{}
-	// err := decoder.Decode(&params)
-	// if err != nil {
-	// 	respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters")
-	// 	return false, "Couldn't decode parameters"
-	// }
 	if len(body) > 140 {
-		// respondWithError(w, http.StatusBadRequest, "Chirp is too long")
-		return "", errors.New("Chirp is too long")
+		return "", errors.New("chirp is too long")
 	}
 
 	badWords := map[string]struct{}{
