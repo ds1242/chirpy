@@ -16,7 +16,7 @@ type Chirp struct {
 }
 
 type User struct {
-	ID 		int 	`json:id`
+	ID 		int 	`json:"id"`
 	Email 	string 	`json:"email"`
 }
 type DB struct {

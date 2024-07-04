@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
+	"os"
 	"github.com/ds1242/chirpy/database"
 )
 
@@ -18,7 +20,15 @@ func main() {
 	const filepathRoot = "."
 	const port = "8080"
 
+	dbg := flag.Bool("debug", false, "Enable debug mode")
+	flag.Parse()
 	
+	if *dbg == true {
+		err := os.Remove("./database.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	db, err := database.NewDB("./database.json")
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
