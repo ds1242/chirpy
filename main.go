@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/ds1242/chirpy/database"
 )
 
@@ -12,11 +15,14 @@ import (
 type apiConfig struct {
 	fileserverHits 	int
 	DB 				*database.DB
+	JWTSecret		string
 }
 
 
 
 func main() {
+	godotenv.Load()
+	jwtSecret := os.Getenv("JWT_SECRET")
 	const filepathRoot = "."
 	const port = "8080"
 
@@ -37,6 +43,7 @@ func main() {
 	apiCfg := &apiConfig{
 		fileserverHits: 0,
 		DB:				db,
+		JWTSecret: 		jwtSecret,
 	}
 	mux := http.NewServeMux()
 	mux.Handle("/app/*", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
