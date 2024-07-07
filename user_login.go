@@ -4,7 +4,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	
+
 	"github.com/ds1242/chirpy/helpers"
 )
 
@@ -22,10 +22,10 @@ func (cfg *apiConfig) UserLogin(w http.ResponseWriter, r *http.Request) {
 		helpers.RespondWithError(w, http.StatusBadRequest, "invalid request payload")
 	}
 
-	user, err := cfg.DB.UserLogin(params.Password, params.Email)
+	userResponse, err := cfg.DB.UserLogin(params.Password, params.Email)
 	if err != nil {
 		helpers.RespondWithError(w, http.StatusUnauthorized, err.Error())
 	}
 
-	helpers.RespondWithJSON(w, http.StatusOK, user)
+	helpers.RespondWithJSON(w, http.StatusOK, userResponse)
 }

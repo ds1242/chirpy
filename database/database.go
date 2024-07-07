@@ -10,6 +10,11 @@ import (
 	// "github.com/ds1242/chirpy/helpers"
 )
 
+
+type UserResponse struct {
+	ID 		int 	`json:"id"`
+	Email	string	`json:"email"`
+}
 type Chirp struct {
 	ID 	 int 	`json:"id"`
 	Body string `json:"body"`
@@ -20,6 +25,7 @@ type User struct {
 	Password 	[]byte	`json:"password"` 
 	Email 		string 	`json:"email"`
 }
+
 type DB struct {
 	path string
 	mux  *sync.RWMutex

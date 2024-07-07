@@ -7,15 +7,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (db *DB) CreateUser(password string, email string) (User, error) {
+func (db *DB) CreateUser(password string, email string) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
 	if err != nil {
-		return User{}, err
+		return UserResponse{}, err
 	}
 
 	existingUser := SearchUserByEmail(dbStruct, email)
 	if existingUser != nil {
-		return User{}, errors.New("User already exists")
+		return UserResponse{}, errors.New("User already exists")
 	}
 	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost) 
 	if err != nil {
@@ -32,29 +32,31 @@ func (db *DB) CreateUser(password string, email string) (User, error) {
 	dbStruct.Users[newID] = newUser
 	writeErr := db.writeDB(dbStruct)
 	if writeErr != nil{
-		return User{}, writeErr
+		return UserResponse{}, writeErr
 	}
-	return newUser, nil
+	userResponse := createUserReponse(newUser)
+	return userResponse, nil
 }
 
 
-func (db *DB) UserLogin(password string, email string) (User, error) {
+func (db *DB) UserLogin(password string, email string) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
 	if err != nil {
-		return User{}, err
+		return UserResponse{}, err
 	}
 
 	existingUser := SearchUserByEmail(dbStruct, email)
 	if existingUser == nil {
-		return User{}, errors.New("User does not exist")
-	}
-	
-	passErr := bcrypt.CompareHashAndPassword(existingUser.Password, []byte(password))
-	if passErr != nil {
-		return User{}, passErr
+		return UserResponse{}, errors.New("User does not exist")
 	}
 
-	return *existingUser, nil
+	passErr := bcrypt.CompareHashAndPassword(existingUser.Password, []byte(password))
+	if passErr != nil {
+		return UserResponse{}, passErr
+	}
+
+	userResponse := createUserReponse(*existingUser)
+	return userResponse, nil
 }
 
 func SearchUserByEmail(dbStuct DBStructure, email string) *User {
@@ -64,4 +66,11 @@ func SearchUserByEmail(dbStuct DBStructure, email string) *User {
 		}
 	}
 	return nil
+}
+
+func createUserReponse(user User) UserResponse {
+	return UserResponse{
+		ID: 	user.ID,
+		Email: 	user.Email,
+	}
 }
