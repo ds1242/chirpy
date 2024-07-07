@@ -24,7 +24,7 @@ func (cfg *apiConfig) CreateUsersHandler(w http.ResponseWriter, r *http.Request)
 
 	user, err := cfg.DB.CreateUser(params.Password, params.Email)
 	if err != nil {
-		helpers.RespondWithError(w, http.StatusBadRequest, "unable to create a user")
+		helpers.RespondWithError(w, http.StatusBadRequest, err.Error())
 	}
 	helpers.RespondWithJSON(w, http.StatusCreated, user)
 }
