@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/ds1242/chirpy/database"
 )
 
