@@ -4,8 +4,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"fmt"
-
 	"github.com/ds1242/chirpy/helpers"
 )
 
@@ -34,8 +32,8 @@ func (cfg *apiConfig) UserLogin(w http.ResponseWriter, r *http.Request) {
 		params.ExpiresInSeconds = &defaultExpiration
 	}
 
-	fmt.Println(params)
-	userResponse, err := cfg.DB.UserLogin(params.Password, params.Email)
+	
+	userResponse, err := cfg.DB.UserLogin(params.Password, params.Email, params.ExpiresInSeconds)
 	if err != nil {
 		helpers.RespondWithError(w, http.StatusUnauthorized, err.Error())
 	}

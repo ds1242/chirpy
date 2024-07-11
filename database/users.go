@@ -39,7 +39,7 @@ func (db *DB) CreateUser(password string, email string) (UserResponse, error) {
 }
 
 
-func (db *DB) UserLogin(password string, email string) (UserResponse, error) {
+func (db *DB) UserLogin(password string, email string, expiresInSeconds *int) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
 	if err != nil {
 		return UserResponse{}, err
@@ -54,8 +54,9 @@ func (db *DB) UserLogin(password string, email string) (UserResponse, error) {
 	if passErr != nil {
 		return UserResponse{}, passErr
 	}
-
-	userResponse := createUserReponse(*existingUser)
+	// TODO: Fix this token when the CreateToken func is complete
+	token := `string token`
+	userResponse := createUserReponse(*existingUser, token)
 	return userResponse, nil
 }
 
@@ -68,9 +69,10 @@ func SearchUserByEmail(dbStuct DBStructure, email string) *User {
 	return nil
 }
 
-func createUserReponse(user User) UserResponse {
+func createUserReponse(user User, token string) UserResponse {
 	return UserResponse{
 		ID: 	user.ID,
 		Email: 	user.Email,
+		Token:	token,
 	}
 }
