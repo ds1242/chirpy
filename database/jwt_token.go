@@ -2,7 +2,6 @@ package database
 
 import (
 	"time"
-	// "fmt"
 	"strconv"
 
 	"github.com/golang-jwt/jwt/v5"
