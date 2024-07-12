@@ -14,6 +14,7 @@ import (
 type UserResponse struct {
 	ID 		int 	`json:"id"`
 	Email	string	`json:"email"`
+	Token	string	`json:"token"`
 }
 type Chirp struct {
 	ID 	 int 	`json:"id"`

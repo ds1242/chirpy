@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/ds1242/chirpy/database"
 )
 
@@ -56,6 +55,7 @@ func main() {
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.GetSingleChirpHandler)
 	mux.HandleFunc("POST /api/users", apiCfg.CreateUsersHandler)
 	mux.HandleFunc("POST /api/login", apiCfg.UserLogin)
+	mux.HandleFunc("PUT /api/users", apiCfg.UpdateUser)
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: mux,

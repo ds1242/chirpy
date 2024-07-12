@@ -2,13 +2,17 @@ package database
 
 import (
 	"errors"
-	"log"
+	"log"	
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (db *DB) CreateUser(password string, email string) (UserResponse, error) {
+
+
+func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
+	
 	if err != nil {
 		return UserResponse{}, err
 	}
@@ -34,12 +38,20 @@ func (db *DB) CreateUser(password string, email string) (UserResponse, error) {
 	if writeErr != nil{
 		return UserResponse{}, writeErr
 	}
-	userResponse := createUserReponse(newUser)
+
+	expiresInSeconds := 24 * 60 * 60
+	token, tokenErr := CreateToken(newUser.ID, expiresInSeconds, jwtSecret)
+
+	if tokenErr != nil {
+		return UserResponse{}, tokenErr
+	}
+
+	userResponse := createUserReponse(newUser, token)
 	return userResponse, nil
 }
 
 
-func (db *DB) UserLogin(password string, email string) (UserResponse, error) {
+func (db *DB) UserLogin(password string, email string, expiresInSeconds int, jwtSecret string) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
 	if err != nil {
 		return UserResponse{}, err
@@ -55,8 +67,69 @@ func (db *DB) UserLogin(password string, email string) (UserResponse, error) {
 		return UserResponse{}, passErr
 	}
 
-	userResponse := createUserReponse(*existingUser)
+	token, tokenErr := CreateToken(existingUser.ID, expiresInSeconds, jwtSecret)
+	if tokenErr != nil {
+		return UserResponse{}, tokenErr
+	}
+
+	userResponse := createUserReponse(*existingUser, token)
 	return userResponse, nil
+}
+
+
+type UpdateUserParams struct {
+    Email    string `json:"email,omitempty"`
+    Password string `json:"password,omitempty"`
+}
+
+func (db *DB) UserUpdate(userID string, email string, password string, tokenString string) (UserResponse, error) {
+	id, err := strconv.Atoi(userID)
+
+	if err != nil {
+		return UserResponse{}, err
+	}
+
+
+	dbStruct, err := db.loadDB()
+	
+	if err != nil {
+		return UserResponse{}, err
+	}
+	user, userErr := GetUserByID(dbStruct, id)
+	if userErr != nil {
+		return UserResponse{}, userErr
+	}
+	
+	if len(email) > 0 {
+		user.Email = email
+	}
+
+	if len(password) > 0 {
+		passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost) 
+		if err != nil {
+			log.Fatal(err)
+		}
+		user.Password = passHash
+	}
+
+	dbStruct.Users[id] = *user
+	
+	writeErr := db.writeDB(dbStruct)
+	if writeErr != nil{
+		return UserResponse{}, writeErr
+	}
+
+	userResponse := createUserReponse(*user, tokenString)
+	return userResponse, nil
+}
+
+func GetUserByID(dbStruct DBStructure, userID int) (*User, error) {
+	for _, user := range dbStruct.Users {
+		if user.ID == userID {
+			return &user, nil
+		}
+	}
+	return &User{}, errors.New("error finding user")
 }
 
 func SearchUserByEmail(dbStuct DBStructure, email string) *User {
@@ -68,9 +141,10 @@ func SearchUserByEmail(dbStuct DBStructure, email string) *User {
 	return nil
 }
 
-func createUserReponse(user User) UserResponse {
+func createUserReponse(user User, token string) UserResponse {
 	return UserResponse{
 		ID: 	user.ID,
 		Email: 	user.Email,
+		Token: 	token,
 	}
 }
