@@ -56,6 +56,6 @@ func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		helpers.RespondWithError(w, http.StatusUnauthorized, "not authorized")
 		return
 	}
-	userResponse, err := cfg.DB.UserUpdate(claims.Subject, params.Email, params.Password)
+	userResponse, err := cfg.DB.UserUpdate(claims.Subject, params.Email, params.Password, cfg.JWTSecret)
 	fmt.Println(userResponse)
 }

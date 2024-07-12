@@ -82,7 +82,7 @@ type UpdateUserParams struct {
     Password string `json:"password,omitempty"`
 }
 
-func (db *DB) UserUpdate(userID string, email string, password string) (UserResponse, error) {
+func (db *DB) UserUpdate(userID string, email string, password string, jwtSecret string) (UserResponse, error) {
 	id, err := strconv.Atoi(userID)
 	fmt.Println(email)
 	fmt.Println(password)
@@ -100,8 +100,28 @@ func (db *DB) UserUpdate(userID string, email string, password string) (UserResp
 	if userErr != nil {
 		return UserResponse{}, userErr
 	}
+	
+	if len(email) > 0 {
+		user.Email = email
+	}
 
-	return UserResponse{}, nil
+	if len(password) > 0 {
+		passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost) 
+		if err != nil {
+			log.Fatal(err)
+		}
+		user.Password = passHash
+	}
+
+	dbStruct.Users[id] = *user
+	
+	writeErr := db.writeDB(dbStruct)
+	if writeErr != nil{
+		return UserResponse{}, writeErr
+	}
+
+	userResponse := createUserReponse(*user, jwtSecret)
+	return userResponse, nil
 }
 
 func GetUserByID(dbStruct DBStructure, userID int) (*User, error) {
