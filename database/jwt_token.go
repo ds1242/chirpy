@@ -12,16 +12,21 @@ type UserClaim struct {
 }
 
 func CreateToken(id int, expiresInSeconds int, jwtSecret string)(string, error) {
-	
+	currentTime := time.Now().UTC()
+
+	// create the JWT claims, which include the user ID and expiration time
 	claim := UserClaim {
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresInSeconds))),
-			IssuedAt: jwt.NewNumericDate(time.Now()),
 			Issuer: "chirpy",
+			IssuedAt: jwt.NewNumericDate(currentTime),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresInSeconds) * time.Second)),
 			Subject: strconv.Itoa(id),			
 		},
 	}
+	// Create token with claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+
+	// Sign the token withthe secret
 	signedString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		return "", err

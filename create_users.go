@@ -26,7 +26,6 @@ func (cfg *apiConfig) CreateUsersHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		helpers.RespondWithError(w, http.StatusBadRequest, err.Error())
 	}
-	// token, err := cfg.CreateToken(userResponse.ID)
 	
 	helpers.RespondWithJSON(w, http.StatusCreated, userResponse)
 }
