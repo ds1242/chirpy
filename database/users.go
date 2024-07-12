@@ -3,9 +3,12 @@ package database
 import (
 	"errors"
 	"log"	
-
+	"strconv"
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 )
+
+
 
 func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
@@ -71,6 +74,43 @@ func (db *DB) UserLogin(password string, email string, expiresInSeconds *int, jw
 
 	userResponse := createUserReponse(*existingUser, token)
 	return userResponse, nil
+}
+
+
+type UpdateUserParams struct {
+    Email    string `json:"email,omitempty"`
+    Password string `json:"password,omitempty"`
+}
+
+func (db *DB) UserUpdate(userID string, email string, password string) (UserResponse, error) {
+	id, err := strconv.Atoi(userID)
+	fmt.Println(email)
+	fmt.Println(password)
+	if err != nil {
+		return UserResponse{}, err
+	}
+
+
+	dbStruct, err := db.loadDB()
+	
+	if err != nil {
+		return UserResponse{}, err
+	}
+	user, userErr := GetUserByID(dbStruct, id)
+	if userErr != nil {
+		return UserResponse{}, userErr
+	}
+
+	return UserResponse{}, nil
+}
+
+func GetUserByID(dbStruct DBStructure, userID int) (*User, error) {
+	for _, user := range dbStruct.Users {
+		if user.ID == userID {
+			return &user, nil
+		}
+	}
+	return &User{}, errors.New("error finding user")
 }
 
 func SearchUserByEmail(dbStuct DBStructure, email string) *User {

@@ -20,11 +20,13 @@ func (cfg *apiConfig) CreateUsersHandler(w http.ResponseWriter, r *http.Request)
 
 	if err != nil {
 		helpers.RespondWithError(w, http.StatusBadRequest, "invalid request payload")
+		return
 	}
 
 	userResponse, err := cfg.DB.CreateUser(params.Password, params.Email, cfg.JWTSecret)
 	if err != nil {
 		helpers.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 	
 	helpers.RespondWithJSON(w, http.StatusCreated, userResponse)

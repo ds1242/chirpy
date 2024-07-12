@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"encoding/json"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ds1242/chirpy/helpers"
@@ -13,7 +14,23 @@ type UserClaim struct {
 	jwt.RegisteredClaims
 }
 
+
 func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
+
+	type userParams struct {
+		Password			string 	`json:"password,omitempty"`
+		Email 				string	`json:"email,omitempty"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	params := userParams{}
+
+	err := decoder.Decode(&params)
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusBadRequest, "invalid request payload")
+		return
+	}
+
 	authHeader := r.Header.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
 		helpers.RespondWithError(w, http.StatusUnauthorized, "not authorized")
@@ -39,6 +56,6 @@ func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		helpers.RespondWithError(w, http.StatusUnauthorized, "not authorized")
 		return
 	}
-	fmt.Println("Token is valid:", token)
-	fmt.Println("User claims:", claims.Subject)
+	userResponse, err := cfg.DB.UserUpdate(claims.Subject, params.Email, params.Password)
+	fmt.Println(userResponse)
 }
