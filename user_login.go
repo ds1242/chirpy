@@ -33,10 +33,10 @@ func (cfg *apiConfig) UserLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	
-	userResponse, err := cfg.DB.UserLogin(params.Password, params.Email, params.ExpiresInSeconds)
+	userResponse, err := cfg.DB.UserLogin(params.Password, params.Email, params.ExpiresInSeconds, cfg.JWTSecret)
 	if err != nil {
 		helpers.RespondWithError(w, http.StatusUnauthorized, err.Error())
 	}
-
+	
 	helpers.RespondWithJSON(w, http.StatusOK, userResponse)
 }

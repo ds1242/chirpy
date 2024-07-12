@@ -2,13 +2,14 @@ package database
 
 import (
 	"errors"
-	"log"
+	"log"	
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (db *DB) CreateUser(password string, email string) (UserResponse, error) {
+func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
+	
 	if err != nil {
 		return UserResponse{}, err
 	}
@@ -34,12 +35,20 @@ func (db *DB) CreateUser(password string, email string) (UserResponse, error) {
 	if writeErr != nil{
 		return UserResponse{}, writeErr
 	}
-	userResponse := createUserReponse(newUser)
+
+	expiresInSeconds := 24 * 60 * 60
+	token, tokenErr := CreateToken(newUser.ID, expiresInSeconds, jwtSecret)
+
+	if tokenErr != nil {
+		return UserResponse{}, tokenErr
+	}
+
+	userResponse := createUserReponse(newUser, token)
 	return userResponse, nil
 }
 
 
-func (db *DB) UserLogin(password string, email string, expiresInSeconds *int) (UserResponse, error) {
+func (db *DB) UserLogin(password string, email string, expiresInSeconds *int, jwtSecret string) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
 	if err != nil {
 		return UserResponse{}, err
@@ -54,8 +63,12 @@ func (db *DB) UserLogin(password string, email string, expiresInSeconds *int) (U
 	if passErr != nil {
 		return UserResponse{}, passErr
 	}
-	// TODO: Fix this token when the CreateToken func is complete
-	token := `string token`
+
+	token, tokenErr := CreateToken(existingUser.ID, *expiresInSeconds, jwtSecret)
+	if tokenErr != nil {
+		return UserResponse{}, tokenErr
+	}
+
 	userResponse := createUserReponse(*existingUser, token)
 	return userResponse, nil
 }
@@ -73,6 +86,6 @@ func createUserReponse(user User, token string) UserResponse {
 	return UserResponse{
 		ID: 	user.ID,
 		Email: 	user.Email,
-		Token:	token,
+		Token: 	token,
 	}
 }
