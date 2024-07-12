@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"	
 	"strconv"
-	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -51,7 +51,7 @@ func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserR
 }
 
 
-func (db *DB) UserLogin(password string, email string, expiresInSeconds *int, jwtSecret string) (UserResponse, error) {
+func (db *DB) UserLogin(password string, email string, expiresInSeconds int, jwtSecret string) (UserResponse, error) {
 	dbStruct, err := db.loadDB()
 	if err != nil {
 		return UserResponse{}, err
@@ -67,7 +67,7 @@ func (db *DB) UserLogin(password string, email string, expiresInSeconds *int, jw
 		return UserResponse{}, passErr
 	}
 
-	token, tokenErr := CreateToken(existingUser.ID, *expiresInSeconds, jwtSecret)
+	token, tokenErr := CreateToken(existingUser.ID, expiresInSeconds, jwtSecret)
 	if tokenErr != nil {
 		return UserResponse{}, tokenErr
 	}
@@ -82,10 +82,9 @@ type UpdateUserParams struct {
     Password string `json:"password,omitempty"`
 }
 
-func (db *DB) UserUpdate(userID string, email string, password string, jwtSecret string) (UserResponse, error) {
+func (db *DB) UserUpdate(userID string, email string, password string, tokenString string) (UserResponse, error) {
 	id, err := strconv.Atoi(userID)
-	fmt.Println(email)
-	fmt.Println(password)
+
 	if err != nil {
 		return UserResponse{}, err
 	}
@@ -120,7 +119,7 @@ func (db *DB) UserUpdate(userID string, email string, password string, jwtSecret
 		return UserResponse{}, writeErr
 	}
 
-	userResponse := createUserReponse(*user, jwtSecret)
+	userResponse := createUserReponse(*user, tokenString)
 	return userResponse, nil
 }
 

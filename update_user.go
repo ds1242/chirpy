@@ -52,10 +52,19 @@ func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		helpers.RespondWithError(w, http.StatusUnauthorized, "not authorized")
 		return
 	}
+
 	if !token.Valid {
 		helpers.RespondWithError(w, http.StatusUnauthorized, "not authorized")
 		return
 	}
-	userResponse, err := cfg.DB.UserUpdate(claims.Subject, params.Email, params.Password, cfg.JWTSecret)
-	fmt.Println(userResponse)
+
+	// fmt.Println(token)
+	userResponse, err := cfg.DB.UserUpdate(claims.Subject, params.Email, params.Password, tokenString)
+	// fmt.Println(userResponse)
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	helpers.RespondWithJSON(w, http.StatusOK, userResponse)
 }

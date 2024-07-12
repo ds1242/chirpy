@@ -13,13 +13,13 @@ type UserClaim struct {
 
 func CreateToken(id int, expiresInSeconds int, jwtSecret string)(string, error) {
 	currentTime := time.Now().UTC()
-
+	expirationTime := time.Now().Add(time.Duration(expiresInSeconds) * time.Second).UTC()
 	// create the JWT claims, which include the user ID and expiration time
 	claim := UserClaim {
 		jwt.RegisteredClaims{
 			Issuer: "chirpy",
 			IssuedAt: jwt.NewNumericDate(currentTime),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresInSeconds) * time.Second)),
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			Subject: strconv.Itoa(id),			
 		},
 	}
