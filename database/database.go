@@ -6,15 +6,17 @@ import (
 	"errors"
 	"os"
 	"sync"
+	"time"
 
 	// "github.com/ds1242/chirpy/helpers"
 )
 
 
 type UserResponse struct {
-	ID 		int 	`json:"id"`
-	Email	string	`json:"email"`
-	Token	string	`json:"token"`
+	ID 			int 	`json:"id"`
+	Email		string	`json:"email"`
+	Token		string	`json:"token"`
+	RefreshToken string	`json:"refresh_token"`
 }
 type Chirp struct {
 	ID 	 int 	`json:"id"`
@@ -22,10 +24,18 @@ type Chirp struct {
 }
 
 type User struct {
-	ID 			int 	`json:"id"`
-	Password 	[]byte	`json:"password"` 
-	Email 		string 	`json:"email"`
+	ID 					int 	`json:"id"`
+	Password 			[]byte	`json:"password"` 
+	Email 				string 	`json:"email"`
+	RefreshToken		string	`json:"refresh_token"`
+	RefreshExpiration	time.Time	`json:"refresh_token_expiration"`
 }
+
+type UpdateUserParams struct {
+    Email    string `json:"email,omitempty"`
+    Password string `json:"password,omitempty"`
+}
+
 
 type DB struct {
 	path string
