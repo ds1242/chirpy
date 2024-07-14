@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -31,7 +30,7 @@ func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserR
 		log.Fatal(err)
 	}
 
-	refreshToken, refreshTokenErr := generateRefreshToken() 
+	refreshToken, refreshDate, refreshTokenErr := generateRefreshToken() 
 	if refreshTokenErr != nil {
 		return UserResponse{}, refreshTokenErr
 	}
@@ -42,7 +41,7 @@ func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserR
 		Password: 		passHash,
 		Email: 			email,
 		RefreshToken: 	refreshToken,
-		RefreshExpiration: time.Now().Add(time.Duration(60) * 24 * time.Hour).UTC(),
+		RefreshExpiration: refreshDate,
 	}
 
 	dbStruct.Users[newID] = newUser
@@ -84,13 +83,21 @@ func (db *DB) UserLogin(password string, email string, expiresInSeconds int, jwt
 		return UserResponse{}, tokenErr
 	}
 	// if existingUser.RefreshToken
-	refreshToken, refreshTokenErr := generateRefreshToken() 
-	if refreshTokenErr != nil {
-		return UserResponse{}, refreshTokenErr
-	}
-	// TODO: update the refreshToken
-	fmt.Println(refreshToken)
+	if time.Now().UTC().After(existingUser.RefreshExpiration) {		
+		refreshToken, refreshDate, refreshTokenErr := generateRefreshToken() 
+		if refreshTokenErr != nil {
+			return UserResponse{}, refreshTokenErr
+		}
+		existingUser.RefreshToken = refreshToken
+		existingUser.RefreshExpiration = refreshDate
+		dbStruct.Users[existingUser.ID] = *existingUser
 
+		writeErr := db.writeDB(dbStruct)
+		if writeErr != nil{
+			return UserResponse{}, writeErr
+		}
+	}
+	
 	userResponse := createUserReponse(*existingUser, token)
 	return userResponse, nil
 }
@@ -158,20 +165,22 @@ func SearchUserByEmail(dbStuct DBStructure, email string) *User {
 
 func createUserReponse(user User, token string) UserResponse {
 	return UserResponse{
-		ID: 	user.ID,
-		Email: 	user.Email,
-		Token: 	token,
+		ID: 			user.ID,
+		Email: 			user.Email,
+		Token: 			token,
+		RefreshToken: 	user.RefreshToken,
 	}
 }
 
-func generateRefreshToken()(string, error) {
+func generateRefreshToken()(string, time.Time, error) {
 	refreshToken := make([]byte, 32)
 	_, err := rand.Read(refreshToken)
 	if err != nil {
-		return "", nil
+		return "", time.Time{}, err
 	}
 
 	encodedString := hex.EncodeToString(refreshToken)
+	refreshDate := time.Now().Add(time.Duration(60) * 24 * time.Hour).UTC()
 
-	return encodedString, nil
+	return encodedString, refreshDate, nil
 }
