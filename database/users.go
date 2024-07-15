@@ -1,12 +1,16 @@
 package database
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
-	"log"	
+	"log"
 	"strconv"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
 
 
 
@@ -25,12 +29,19 @@ func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserR
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
+	refreshToken, refreshDate, refreshTokenErr := GenerateRefreshToken() 
+	if refreshTokenErr != nil {
+		return UserResponse{}, refreshTokenErr
+	}
+
 	newID := len(dbStruct.Users) + 1
 	newUser := User{
-		ID: 	newID,
-		Password: passHash,
-		Email: 	email,
+		ID: 			newID,
+		Password: 		passHash,
+		Email: 			email,
+		RefreshToken: 	refreshToken,
+		RefreshExpiration: refreshDate,
 	}
 
 	dbStruct.Users[newID] = newUser
@@ -39,7 +50,7 @@ func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserR
 		return UserResponse{}, writeErr
 	}
 
-	expiresInSeconds := 24 * 60 * 60
+	expiresInSeconds := 60 * 60
 	token, tokenErr := CreateToken(newUser.ID, expiresInSeconds, jwtSecret)
 
 	if tokenErr != nil {
@@ -71,16 +82,27 @@ func (db *DB) UserLogin(password string, email string, expiresInSeconds int, jwt
 	if tokenErr != nil {
 		return UserResponse{}, tokenErr
 	}
+	// if existingUser.RefreshToken
+	if time.Now().UTC().After(existingUser.RefreshExpiration) {		
+		refreshToken, refreshDate, refreshTokenErr := GenerateRefreshToken() 
+		if refreshTokenErr != nil {
+			return UserResponse{}, refreshTokenErr
+		}
+		existingUser.RefreshToken = refreshToken
+		existingUser.RefreshExpiration = refreshDate
+		dbStruct.Users[existingUser.ID] = *existingUser
 
+		writeErr := db.writeDB(dbStruct)
+		if writeErr != nil{
+			return UserResponse{}, writeErr
+		}
+	}
+	
 	userResponse := createUserReponse(*existingUser, token)
 	return userResponse, nil
 }
 
 
-type UpdateUserParams struct {
-    Email    string `json:"email,omitempty"`
-    Password string `json:"password,omitempty"`
-}
 
 func (db *DB) UserUpdate(userID string, email string, password string, tokenString string) (UserResponse, error) {
 	id, err := strconv.Atoi(userID)
@@ -143,8 +165,22 @@ func SearchUserByEmail(dbStuct DBStructure, email string) *User {
 
 func createUserReponse(user User, token string) UserResponse {
 	return UserResponse{
-		ID: 	user.ID,
-		Email: 	user.Email,
-		Token: 	token,
+		ID: 			user.ID,
+		Email: 			user.Email,
+		Token: 			token,
+		RefreshToken: 	user.RefreshToken,
 	}
+}
+
+func GenerateRefreshToken()(string, time.Time, error) {
+	refreshToken := make([]byte, 32)
+	_, err := rand.Read(refreshToken)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	encodedString := hex.EncodeToString(refreshToken)
+	refreshDate := time.Now().Add(time.Duration(60) * 24 * time.Hour).UTC()
+
+	return encodedString, refreshDate, nil
 }

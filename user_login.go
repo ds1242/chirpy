@@ -14,7 +14,7 @@ func (cfg *apiConfig) UserLogin(w http.ResponseWriter, r *http.Request) {
 		ExpiresInSeconds 	int 	`json:"expires_in_seconds,omitempty"`
 	}
 
-	defaultExpiration := 24 * 60 * 60
+	defaultJWTExpiration := 60 * 60
 
 	decoder := json.NewDecoder(r.Body)
 	params := userParams{}
@@ -25,8 +25,8 @@ func (cfg *apiConfig) UserLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	expiresInSeconds := params.ExpiresInSeconds   // Assuming you've parsed this from request body
-	if expiresInSeconds == 0 || expiresInSeconds > defaultExpiration {
-		expiresInSeconds = defaultExpiration
+	if expiresInSeconds == 0 || expiresInSeconds > defaultJWTExpiration {
+		expiresInSeconds = defaultJWTExpiration
 	}
 
 	userResponse, err := cfg.DB.UserLogin(params.Password, params.Email, expiresInSeconds, cfg.JWTSecret)
