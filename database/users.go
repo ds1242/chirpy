@@ -30,7 +30,7 @@ func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserR
 		log.Fatal(err)
 	}
 
-	refreshToken, refreshDate, refreshTokenErr := generateRefreshToken() 
+	refreshToken, refreshDate, refreshTokenErr := GenerateRefreshToken() 
 	if refreshTokenErr != nil {
 		return UserResponse{}, refreshTokenErr
 	}
@@ -84,7 +84,7 @@ func (db *DB) UserLogin(password string, email string, expiresInSeconds int, jwt
 	}
 	// if existingUser.RefreshToken
 	if time.Now().UTC().After(existingUser.RefreshExpiration) {		
-		refreshToken, refreshDate, refreshTokenErr := generateRefreshToken() 
+		refreshToken, refreshDate, refreshTokenErr := GenerateRefreshToken() 
 		if refreshTokenErr != nil {
 			return UserResponse{}, refreshTokenErr
 		}
@@ -172,7 +172,7 @@ func createUserReponse(user User, token string) UserResponse {
 	}
 }
 
-func generateRefreshToken()(string, time.Time, error) {
+func GenerateRefreshToken()(string, time.Time, error) {
 	refreshToken := make([]byte, 32)
 	_, err := rand.Read(refreshToken)
 	if err != nil {
