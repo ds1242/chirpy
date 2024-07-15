@@ -44,6 +44,7 @@ func main() {
 		DB:				db,
 		JWTSecret: 		jwtSecret,
 	}
+	
 	mux := http.NewServeMux()
 	mux.Handle("/app/*", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
 	mux.Handle("/assets", http.FileServer(http.Dir(filepathRoot)))

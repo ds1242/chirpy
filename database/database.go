@@ -6,47 +6,9 @@ import (
 	"errors"
 	"os"
 	"sync"
-	"time"
 
 	// "github.com/ds1242/chirpy/helpers"
 )
-
-
-type UserResponse struct {
-	ID 			int 	`json:"id"`
-	Email		string	`json:"email"`
-	Token		string	`json:"token"`
-	RefreshToken string	`json:"refresh_token"`
-}
-type Chirp struct {
-	ID 	 int 	`json:"id"`
-	Body string `json:"body"`
-}
-
-type User struct {
-	ID 					int 	`json:"id"`
-	Password 			[]byte	`json:"password"` 
-	Email 				string 	`json:"email"`
-	RefreshToken		string	`json:"refresh_token"`
-	RefreshExpiration	time.Time	`json:"refresh_token_expiration"`
-}
-
-type UpdateUserParams struct {
-    Email    string `json:"email,omitempty"`
-    Password string `json:"password,omitempty"`
-}
-
-
-type DB struct {
-	path string
-	mux  *sync.RWMutex
-}
-
-type DBStructure struct {
-	Chirps 	map[int]Chirp 	`json:"chirps"`
-	Users 	map[int]User 	`json:"users"`
-}
-
 
 // NewDB creates a new database connection
 // and creates the database file if it doesn't exist
