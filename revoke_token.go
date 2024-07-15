@@ -8,7 +8,7 @@ import (
 )
 
 
-func (cfg *apiConfig) RefreshToken(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) RevokeToken(w http.ResponseWriter, r *http.Request) {
 	// Get the header token
 	authHeader := r.Header.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
@@ -17,20 +17,13 @@ func (cfg *apiConfig) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 	// strip down the token from the header
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	
-	// call refresh token func
-	token, err := cfg.DB.RefreshJWTToken(tokenString, cfg.JWTSecret)
+
+	err := cfg.DB.RevokeRefreshToken(tokenString)
+
 	if err != nil {
 		helpers.RespondWithError(w, http.StatusUnauthorized, err.Error())
-		return 
 	}
-	type responseStruct struct {
-		Token string 	`json:"token"`
-	}
-	output := responseStruct {
-		Token: token,
-	}
-	// return new token if no errors
-	helpers.RespondWithJSON(w, http.StatusOK, output)
-
+	
+	w.WriteHeader(http.StatusNoContent)
+	
 }

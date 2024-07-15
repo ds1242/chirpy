@@ -57,6 +57,7 @@ func main() {
 	mux.HandleFunc("POST /api/login", apiCfg.UserLogin)
 	mux.HandleFunc("PUT /api/users", apiCfg.UpdateUser)
 	mux.HandleFunc("POST /api/refresh", apiCfg.RefreshToken)
+	mux.HandleFunc("POST /api/revoke", apiCfg.RevokeToken)
 
 	
 	srv := &http.Server{
