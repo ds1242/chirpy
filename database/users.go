@@ -37,11 +37,12 @@ func (db *DB) CreateUser(password string, email string, jwtSecret string) (UserR
 
 	newID := len(dbStruct.Users) + 1
 	newUser := User{
-		ID: 			newID,
-		Password: 		passHash,
-		Email: 			email,
-		RefreshToken: 	refreshToken,
-		RefreshExpiration: refreshDate,
+		ID: 				newID,
+		Password: 			passHash,
+		Email: 				email,
+		RefreshToken: 		refreshToken,
+		RefreshExpiration: 	refreshDate,
+		IsChirpyRed: 		false,
 	}
 
 	dbStruct.Users[newID] = newUser
@@ -169,6 +170,7 @@ func createUserReponse(user User, token string) UserResponse {
 		Email: 			user.Email,
 		Token: 			token,
 		RefreshToken: 	user.RefreshToken,
+		IsChirpyRed: 	user.IsChirpyRed,
 	}
 }
 
