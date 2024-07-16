@@ -9,9 +9,6 @@ import (
 
 
 func (cfg *apiConfig) UserRedUpgradeHandler(w http.ResponseWriter, r *http.Request) {
-	// type DataStruct struct{
-	// 	UserID 	string `json:"user_id"`
-	// }
 	type Params struct {
 		Event	string `json:"event"`
 		Data   	struct {
