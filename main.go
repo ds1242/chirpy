@@ -61,6 +61,7 @@ func main() {
 	mux.HandleFunc("POST /api/refresh", apiCfg.RefreshTokenHandler)
 	mux.HandleFunc("POST /api/revoke", apiCfg.RevokeTokenHandler)
 
+	mux.HandleFunc("POST /api/polka/webhooks", apiCfg.UserRedUpgradeHandler)
 	
 	srv := &http.Server{
 		Addr:    ":" + port,
