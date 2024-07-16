@@ -3,19 +3,20 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/ds1242/chirpy/helpers"
 )
 
 
 func (cfg *apiConfig) UserRedUpgradeHandler(w http.ResponseWriter, r *http.Request) {
-	type DataStruct struct{
-		UserID 	string `json:"user_id"`
-	}
+	// type DataStruct struct{
+	// 	UserID 	string `json:"user_id"`
+	// }
 	type Params struct {
 		Event	string `json:"event"`
-		Data   	DataStruct 
+		Data   	struct {
+			UserID int `json:"user_id"`
+		} `json:"data"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -31,15 +32,9 @@ func (cfg *apiConfig) UserRedUpgradeHandler(w http.ResponseWriter, r *http.Reque
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNoContent)		
 		return 
-	}
-	userIdInt, convErr := strconv.Atoi(params.Data.UserID)
-	if convErr != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNoContent)	
-		return 
-	}
+	}	
 
-	upgradeUserErr := cfg.DB.UpgradeUserToChirpyRed(userIdInt)
+	upgradeUserErr := cfg.DB.UpgradeUserToChirpyRed(params.Data.UserID)
 	if upgradeUserErr != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
