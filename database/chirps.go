@@ -2,20 +2,29 @@ package database
 
 import (
 	"os"
+	"strconv"
 )
 
 // CreateChirp creates a new chirp and saves it to disk
-func (db *DB) CreateChirp(body string, jwtToken string) (Chirp, error) {
+func (db *DB) CreateChirp(body string, userID string) (Chirp, error) {
 	dbStruct, err := db.loadDB()
 	if err != nil {
 		return Chirp{}, err
 	}
+
+	authorId, err := strconv.Atoi(userID)
+	if err != nil {
+		return Chirp{}, err
+	}
+
+
 
 	newID := len(dbStruct.Chirps) + 1
 
 	newChirp := Chirp{
 		ID: 	newID,
 		Body: 	body,
+		AuthorID: authorId,
 	}
 	
 	dbStruct.Chirps[newID] = newChirp
