@@ -44,7 +44,7 @@ func main() {
 		DB:				db,
 		JWTSecret: 		jwtSecret,
 	}
-	
+
 	mux := http.NewServeMux()
 	mux.Handle("/app/*", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
 	mux.Handle("/assets", http.FileServer(http.Dir(filepathRoot)))
@@ -55,10 +55,11 @@ func main() {
 	mux.HandleFunc("GET /api/chirps", apiCfg.GetAllChirpsHandler)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.GetSingleChirpHandler)
 	mux.HandleFunc("POST /api/users", apiCfg.CreateUsersHandler)
-	mux.HandleFunc("POST /api/login", apiCfg.UserLogin)
-	mux.HandleFunc("PUT /api/users", apiCfg.UpdateUser)
-	mux.HandleFunc("POST /api/refresh", apiCfg.RefreshToken)
-	mux.HandleFunc("POST /api/revoke", apiCfg.RevokeToken)
+	mux.HandleFunc("POST /api/login", apiCfg.UserLoginHandler)
+	mux.HandleFunc("PUT /api/users", apiCfg.UpdateUserHandler)
+	mux.HandleFunc("POST /api/refresh", apiCfg.RefreshTokenHandler)
+	mux.HandleFunc("POST /api/revoke", apiCfg.RevokeTokenHandler)
+	mux.HandleFunc("DELETE /api/chirps/{chirpsID0}", apiCfg.DeleteChirpsHandler)
 
 	
 	srv := &http.Server{

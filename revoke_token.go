@@ -8,7 +8,7 @@ import (
 )
 
 
-func (cfg *apiConfig) RevokeToken(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) RevokeTokenHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the header token
 	authHeader := r.Header.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
