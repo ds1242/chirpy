@@ -54,12 +54,12 @@ func main() {
 	mux.HandleFunc("POST /api/chirps", apiCfg.CreateChirpHandler)
 	mux.HandleFunc("GET /api/chirps", apiCfg.GetAllChirpsHandler)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.GetSingleChirpHandler)
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.DeleteChirpsHandler)
 	mux.HandleFunc("POST /api/users", apiCfg.CreateUsersHandler)
 	mux.HandleFunc("POST /api/login", apiCfg.UserLoginHandler)
 	mux.HandleFunc("PUT /api/users", apiCfg.UpdateUserHandler)
 	mux.HandleFunc("POST /api/refresh", apiCfg.RefreshTokenHandler)
 	mux.HandleFunc("POST /api/revoke", apiCfg.RevokeTokenHandler)
-	mux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.DeleteChirpsHandler)
 
 	
 	srv := &http.Server{
