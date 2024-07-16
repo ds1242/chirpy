@@ -15,7 +15,7 @@ type UserClaim struct {
 }
 
 
-func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	type userParams struct {
 		Password			string 	`json:"password,omitempty"`

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
+	"errors"
 
 )
 
@@ -29,4 +31,18 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 	w.WriteHeader(code)
 	w.Write(dat)
+}
+
+
+func GetJWTAndStripBearer(w http.ResponseWriter, r http.Request) (string, error){
+	// Get the header token
+	authHeader := r.Header.Get("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return "", errors.New("not authorized")
+	}
+
+	// strip down the token from the header
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+	return tokenString, nil
 }

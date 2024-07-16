@@ -7,7 +7,7 @@ import (
 	"github.com/ds1242/chirpy/helpers"
 )
 
-func (cfg *apiConfig) UserLogin(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	type userParams struct {
 		Password			string 	`json:"password"`
 		Email 				string	`json:"email"`
