@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"fmt"
 
 	"github.com/ds1242/chirpy/database"
 	"github.com/ds1242/chirpy/helpers"
@@ -18,7 +19,16 @@ func (cfg *apiConfig) GetAllChirpsHandler(w http.ResponseWriter, r *http.Request
 
 	// check for author_id optional parameter
 	author_id := r.URL.Query().Get("author_id")
-
+	
+	// check for sort parameter
+	sortParam := r.URL.Query().Get("sort")
+	if len(sortParam) == 0 {
+		sortParam = "asc"
+	}
+	if sortParam != "asc" || sortParam != "desc" {
+		sortParam = "asc"
+	}
+	fmt.Println(sortParam)
 	if len(author_id) == 0 {
 		dbChirps, dbChirpErr = cfg.DB.GetChirps()
 	} else {
