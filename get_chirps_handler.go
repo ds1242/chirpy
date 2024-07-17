@@ -53,10 +53,16 @@ func (cfg *apiConfig) GetAllChirpsHandler(w http.ResponseWriter, r *http.Request
 			AuthorID: dbChirp.AuthorID,
 		})
 	}
-
-	sort.Slice(chirps, func(i, j int) bool {
-		return chirps[i].ID < chirps[j].ID
-	})
+	if sortParam == "asc" {
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].ID < chirps[j].ID
+		})
+	}
+	if sortParam == "desc" {
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].ID > chirps[j].ID
+		})
+	}
 
 	helpers.RespondWithJSON(w, http.StatusOK, chirps)
 }
