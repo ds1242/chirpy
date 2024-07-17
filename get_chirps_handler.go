@@ -25,7 +25,7 @@ func (cfg *apiConfig) GetAllChirpsHandler(w http.ResponseWriter, r *http.Request
 	if len(sortParam) == 0 {
 		sortParam = "asc"
 	}
-	if sortParam != "asc" || sortParam != "desc" {
+	if sortParam != "asc" && sortParam != "desc" {
 		sortParam = "asc"
 	}
 	fmt.Println(sortParam)
